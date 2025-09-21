@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
+import fs from 'fs';
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -20,7 +21,7 @@ router.get('/', async (req, res, next) => {
       });
     }
 
-    res.render('index', { user: req.user, files: user ? user.files : [] });
+    res.render('index', { user: req.user, files: user });
   } catch (err) {
     next(err);
   }
@@ -74,25 +75,49 @@ router.get('/log-out', (req, res, next) => {
   });
 });
 
-router.get('/storefile', (req, res) => {
-  render('storefile');
+router.get('/storefile/:index', (req, res) => {
+  res.render('storefile');
 });
 
 router.post('/storefile', upload.single('userfile'), async (req, res, next) => {
   try {
-    const filePath = req.file.path;
-    const userId = req.user.id;
+    const fileBuffer = fs.readFileSync(req.file.path);
 
     await prisma.file_Storage.create({
       data: {
-        content: filePath,
-        authorId: userId,
+        filename: req.file.originalname,
+        content: fileBuffer,
+        authorId: req.user.id,
       },
     });
-    res.send('File uploaded successfully!');
+    res.redirect('/');
   } catch (err) {
     console.error(err);
     res.status(500).send('server Error');
+  }
+});
+
+router.get('/download/:id', async (req, res) => {
+  try {
+    const fileid = parseInt(req.params.id);
+
+    const file = await prisma.file_Storage.findUnique({
+      where: { id: fileid },
+    });
+
+    if (!file) {
+      return res.status(404).send('File Not Found');
+    }
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${file.filename}"`
+    );
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    res.send(file.content);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
   }
 });
 

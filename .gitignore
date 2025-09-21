@@ -5,7 +5,7 @@ node_modules
 /generated/prisma
 
 generated
-
+uploads
 # Logs
 logs
 *.log

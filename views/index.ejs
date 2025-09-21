@@ -8,14 +8,18 @@
     <% if (locals.user) {%>
     <h1>WELCOME BACK <%= user.username %></h1>
     <a href="/log-out">LOG OUT</a>
-    <a href="/storefile">Upload File</a>
+    <a href="/storefile/<%= files.id%>">Upload File</a>
 
-    <% for(let i=0;i<files.length; i++){%>
+    <% for(let i=0;i<files.files.length; i++){%>
             <div>
-                <p><strong>Message: </strong><%=files[i].content %></p>
-                <p><strong>User: </strong><%=files[i].author %></p>
+              <p><strong>File Name: </strong><%=files.files[i].filename %></p>
+                <p><strong>Size: </strong><%=((files.files[i].content.length)/1024).toFixed(2) %> KB</p>
+                <p><strong>User: </strong><%=files.username %></p>
                   <button type="button">
-                    <a href="/delete/<%= files[i].id %>">Delete</a>
+                    <a href="/delete/<%= files.files[i].id %>">Delete</a>
+                  </button>
+                  <button type="button">
+                     <a href="/download/<%= files.files[i].id%>">Download File</a>
                   </button>
             </div>
         <%}%>

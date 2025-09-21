@@ -47,7 +47,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await prisma.Users.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id },
     });
     done(null, user);
@@ -67,7 +67,7 @@ app.use(
   session({ secret: 'HaoAreYou', resave: false, saveUninitialized: false })
 );
 
-app.use(passport.initialize()); // ⬅ you were missing this line
+app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 
